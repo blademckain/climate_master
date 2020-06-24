@@ -57,8 +57,8 @@ _PRESET_SCHEMA = vol.Schema(
                 )
             ],
         ),
-        vol.Optional(CONF_TEMP_MIN): vol.Coerce(float),
-        vol.Optional(CONF_TEMP_MAX): vol.Coerce(float),
+        vol.Optional(ATTR_TARGET_TEMP_LOW): vol.Coerce(float),
+        vol.Optional(ATTR_TARGET_TEMP_HIGH): vol.Coerce(float),
     }
 )
 
