@@ -120,6 +120,7 @@ async def async_setup_platform(
 
 
 
+
 class ClimateMaster(ClimateDevice):
     """Representation of a climate group."""
 
