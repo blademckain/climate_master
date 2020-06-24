@@ -123,7 +123,7 @@ class ClimateMaster(ClimateDevice):
     """Representation of a climate group."""
 
     def __init__(
-            self, name: str, entity_ids: List[str], excluded: List[str], unit: str, preset: Dict[str, float, float]
+            self, name: str, entity_ids: List[str], excluded: List[str], unit: str, preset: Dict,
     ) -> None:
         """Initialize a climate group."""
         self._name = name  # type: str
