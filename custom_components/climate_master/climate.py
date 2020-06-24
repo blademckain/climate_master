@@ -57,8 +57,6 @@ _PRESET_SCHEMA = vol.Schema(
                 )
             ],
         ),
-        vol.Required(ATTR_TARGET_TEMP_LOW): vol.Coerce(float),
-        vol.Required(ATTR_TARGET_TEMP_HIGH): vol.Coerce(float),
     }
 )
 
@@ -84,7 +82,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
                 )
             ],
         ),
-        vol.Optional(CONF_PRESET, default=[]): vol.All(
+        vol.Optional(CONF_PRESET): vol.All(
             cv.ensure_list, [_PRESET_SCHEMA]
         ),
     }
