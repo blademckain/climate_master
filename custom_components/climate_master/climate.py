@@ -6,7 +6,7 @@ https://developers.home-assistant.io/docs/en/entity_climate.html
 """
 import itertools
 import logging
-from collections import Counter
+from collections import Counter, namedtuple
 from typing import List, Optional, Iterator, Any, Callable
 
 import voluptuous as vol
@@ -150,7 +150,7 @@ class ClimateMaster(ClimateDevice):
         self._preset_modes = None
         self._preset = None
         self._excluded = excluded
-        self._preset = namedtuple("preset", preset.keys())(*preset.values())
+        ######self._preset = namedtuple("preset", preset.keys())(*preset.values())
 
     async def async_added_to_hass(self) -> None:
         """Register callbacks."""
