@@ -37,6 +37,31 @@ _LOGGER = logging.getLogger(__name__)
 DEFAULT_NAME = "Climate Master"
 
 CONF_EXCLUDE = "exclude"
+CONF_PRESET = "preset"
+
+_PRESET_SCHEMA = vol.Schema(
+    {
+        vol.Required(CONF_NAME): vol.All(
+            cv.ensure_list,
+            [
+                vol.In(
+                    [
+                        PRESET_ACTIVITY,
+                        PRESET_AWAY,
+                        PRESET_BOOST,
+                        PRESET_COMFORT,
+                        PRESET_ECO,
+                        PRESET_HOME,
+                        PRESET_SLEEP,
+                    ]
+                )
+            ],
+        ),
+        vol.Required(ATTR_TARGET_TEMP_LOW): vol.Coerce(float),
+        vol.Required(ATTR_TARGET_TEMP_HIGH): vol.Coerce(float),
+    }
+)
+
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
@@ -58,6 +83,9 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
                     ]
                 )
             ],
+        ),
+        vol.Optional(CONF_PRESET, default=[]): vol.All(
+            cv.ensure_list, [_PRESET_SCHEMA]
         ),
     }
 )
