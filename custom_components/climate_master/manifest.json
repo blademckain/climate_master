@@ -1,0 +1,9 @@
+{
+  "domain": "climate_master",
+  "name": "Climate Master",
+  "documentation": "https://github.com/blademckain/climate_master",
+  "dependencies": [],
+  "codeowners": ["@blademckain"],
+  "requirements": [],
+  "homeassistant": "0.96.0"
+}
