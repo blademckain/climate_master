@@ -1,7 +1,8 @@
 """
-This platform allows groups multiple climate devices to a single entity and create a Dummy Climate that acts as a master.
+This platform allows several climate devices to be grouped into one climate device.
 
-
+For more details about this platform, please refer to the documentation at
+https://home-assistant.io/components/climate.group/
 
 For more details on climate component, please refer to the documentation at
 https://developers.home-assistant.io/docs/en/entity_climate.html
@@ -15,7 +16,7 @@ import voluptuous as vol
 
 import homeassistant.helpers.config_validation as cv
 from homeassistant.components import climate
-from homeassistant.components.climate import ClimateEntity, PLATFORM_SCHEMA
+from homeassistant.components.climate import ClimateDevice, PLATFORM_SCHEMA
 from homeassistant.components.climate.const import *
 from homeassistant.const import (
     ATTR_ENTITY_ID,
@@ -60,10 +61,8 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         ),
     }
 )
-# edit the supported_flags
-SUPPORT_FLAGS = (
-    SUPPORT_TARGET_TEMPERATURE | SUPPORT_TARGET_TEMPERATURE_RANGE | SUPPORT_PRESET_MODE
-)
+#edit the supported_flags
+SUPPORT_FLAGS = SUPPORT_TARGET_TEMPERATURE, SUPPORT_TARGET_TEMPERATURE_RANGE
 
 
 # HVAC Action priority
@@ -79,7 +78,7 @@ HVAC_ACTIONS = [
 
 
 async def async_setup_platform(
-    hass: HomeAssistantType, config: ConfigType, async_add_entities, discovery_info=None
+        hass: HomeAssistantType, config: ConfigType, async_add_entities, discovery_info=None
 ) -> None:
     """Initialize climate.group platform."""
     async_add_entities(
@@ -94,11 +93,11 @@ async def async_setup_platform(
     )
 
 
-class ClimateMaster(ClimateEntity):
+class ClimateMaster(ClimateDevice):
     """Representation of a climate group."""
 
     def __init__(
-        self, name: str, entity_ids: List[str], excluded: List[str], unit: str
+            self, name: str, entity_ids: List[str], excluded: List[str], unit: str
     ) -> None:
         """Initialize a climate group."""
         self._name = name  # type: str
@@ -111,7 +110,7 @@ class ClimateMaster(ClimateEntity):
         self._max_temp = 0
         self._current_temp = 0
         self._target_temp = 0
-        # added the temp_low and temp_high
+        #added the temp_low and temp_high
         self._target_temp_high = None
         self._target_temp_low = None
         self._mode = None
@@ -129,7 +128,7 @@ class ClimateMaster(ClimateEntity):
 
         @callback
         def async_state_changed_listener(
-            entity_id: str, old_state: State, new_state: State
+                entity_id: str, old_state: State, new_state: State
         ):
             """Handle child updates."""
             self.async_schedule_update_ha_state(True)
@@ -190,7 +189,7 @@ class ClimateMaster(ClimateEntity):
     def target_temperature(self):
         return self._target_temp
 
-    # added the target_temperature_low and target_temperature_high
+    #added the target_temperature_low and target_temperature_high
     @property
     def target_temperature_low(self):
         return self._target_temp_low
@@ -215,12 +214,8 @@ class ClimateMaster(ClimateEntity):
         if ATTR_HVAC_MODE in kwargs:
             hvac_mode = kwargs.get(ATTR_HVAC_MODE)
             await self.async_set_hvac_mode(hvac_mode)
-        # start add
-        elif (
-            ATTR_TEMPERATURE in kwargs
-            or ATTR_TARGET_TEMP_LOW in kwargs
-            or ATTR_TARGET_TEMP_HIGH in kwargs
-        ):
+        #start add
+        elif ATTR_TEMPERATURE in kwargs or ATTR_TARGET_TEMP_LOW in kwargs or ATTR_TARGET_TEMP_HIGH in kwargs:
             if ATTR_TEMPERATURE in kwargs:
                 temperature = kwargs.get(ATTR_TEMPERATURE)
                 data[ATTR_TEMPERATURE] = temperature
@@ -229,7 +224,7 @@ class ClimateMaster(ClimateEntity):
                 temperature_high = kwargs.get(ATTR_TARGET_TEMP_HIGH)
                 data[climate.ATTR_TARGET_TEMP_LOW] = temperature_low
                 data[climate.ATTR_TARGET_TEMP_HIGH] = temperature_high
-            # end add
+            #end add
             await self.hass.services.async_call(
                 climate.DOMAIN, climate.SERVICE_SET_TEMPERATURE, data, blocking=True
             )
@@ -270,7 +265,7 @@ class ClimateMaster(ClimateEntity):
         filtered_states = list(
             filter(
                 lambda x: x.attributes.get(ATTR_PRESET_MODE, None)
-                not in self._excluded,
+                          not in self._excluded,
                 states,
             )
         )
@@ -311,12 +306,10 @@ class ClimateMaster(ClimateEntity):
 
         self._target_temp = _reduce_attribute(filtered_states, ATTR_TEMPERATURE)
 
-        # start add
+        #start add
         self._target_temp_low = _reduce_attribute(filtered_states, ATTR_TARGET_TEMP_LOW)
-        self._target_temp_high = _reduce_attribute(
-            filtered_states, ATTR_TARGET_TEMP_HIGH
-        )
-        # end add
+        self._target_temp_high = _reduce_attribute(filtered_states, ATTR_TARGET_TEMP_HIGH)
+        #end add
 
         self._current_temp = _reduce_attribute(
             filtered_states, ATTR_CURRENT_TEMPERATURE
@@ -325,6 +318,7 @@ class ClimateMaster(ClimateEntity):
         _LOGGER.debug(
             f"Target temp: {self._target_temp}; Target temp low: {self._target_temp_low}; Target temp high: {self._target_temp_high}; Current temp: {self._current_temp}"
         )
+
         self._min_temp = _reduce_attribute(states, ATTR_MIN_TEMP, reduce=max)
         self._max_temp = _reduce_attribute(states, ATTR_MAX_TEMP, reduce=min)
 
@@ -340,9 +334,6 @@ class ClimateMaster(ClimateEntity):
             # Merge supported features by emulating support for every feature
             # we find.
             self._supported_features |= support
-        # Bitwise-and the supported features with the Grouped climate's features
-        # so that we don't break in the future when a new feature is added.
-        self._supported_features &= SUPPORT_FLAGS
 
         self._preset_modes = None
         presets = []
@@ -351,9 +342,7 @@ class ClimateMaster(ClimateEntity):
 
         if len(presets):
             self._preset_modes = set(presets)
-        _LOGGER.debug(
-            f"State update complete. Supported: {self._supported_features}, mode: {self._mode}"
-        )
+        _LOGGER.debug("State update complete")
 
     async def async_set_preset_mode(self, preset_mode: str):
         """Forward the preset_mode to all climate in the climate group."""
@@ -378,10 +367,10 @@ def _mean(*args):
 
 
 def _reduce_attribute(
-    states: List[State],
-    key: str,
-    default: Optional[Any] = None,
-    reduce: Callable[..., Any] = _mean,
+        states: List[State],
+        key: str,
+        default: Optional[Any] = None,
+        reduce: Callable[..., Any] = _mean,
 ) -> Any:
     """Find the first attribute matching key from states.
     If none are found, return default.
