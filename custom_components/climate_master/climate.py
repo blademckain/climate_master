@@ -150,7 +150,7 @@ class ClimateMaster(ClimateDevice):
         self._preset_modes = None
         self._preset = None
         self._excluded = excluded
-        ######self._preset = namedtuple("preset", preset.keys())(*preset.values())
+        self._preset = namedtuple("preset", preset.keys())(*preset.values())
 
     async def async_added_to_hass(self) -> None:
         """Register callbacks."""
