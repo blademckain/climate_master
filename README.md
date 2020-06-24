@@ -1,18 +1,16 @@
-# climate_group
+# climate_master
 
-Home Assistant Climate Group
+Home Assistant Climate Master
 
-Groups multiple climate devices to a single entity. Useful if you have for instance multiple radiator thermostats in a room and want to control them all together.
-Inspired/copied from light_group component (https://github.com/home-assistant/home-assistant/blob/dev/homeassistant/components/group/light.py)
-
+Groups multiple climate devices to a single entity and create a Dummy Climate that acts as a master
 ## How to install:
 
 ### HACS
-Add this repo (https://github.com/daenny/climate_group) to the HACS store and install from there.
+Add this repo (https://github.com/blademckain/climate_master) to the HACS store and install from there.
 
 ### local install
 Put in "custom_components" folder located in hass.io inside the config folder.
-(The 2 .py file must be config/custom_components/climate_group)
+(The 2 .py file must be config/custom_components/climate_master)
 
 
 
@@ -31,7 +29,13 @@ climate:
     - climate.clima3
     - climate.heater
     - climate.termostate
+	preset:
+	   - name: home
+	     target_temp_low
+		 target_temp_high
+	   - name: sleep
+	     target_temp_low
+		 target_temp_high
 ```
 
 (use the entities you want to have in your climate_group)
-"# climate_master" 
