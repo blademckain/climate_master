@@ -1,8 +1,5 @@
 """
-This platform allows several climate devices to be grouped into one climate device.
-
-For more details about this platform, please refer to the documentation at
-https://home-assistant.io/components/climate.group/
+This platform allows groups multiple climate devices to a single entity and create a Dummy Climate that acts as a master.
 
 For more details on climate component, please refer to the documentation at
 https://developers.home-assistant.io/docs/en/entity_climate.html
@@ -57,8 +54,8 @@ _PRESET_SCHEMA = vol.Schema(
                 )
             ],
         ),
-        vol.Optional(ATTR_TARGET_TEMP_LOW): vol.Coerce(float),
-        vol.Optional(ATTR_TARGET_TEMP_HIGH): vol.Coerce(float),
+        vol.Required(ATTR_TARGET_TEMP_LOW): vol.Coerce(float),
+        vol.Required(ATTR_TARGET_TEMP_HIGH): vol.Coerce(float),
     }
 )
 
@@ -116,6 +113,7 @@ async def async_setup_platform(
                 config[CONF_ENTITIES],
                 config.get(CONF_EXCLUDE),
                 config.get(CONF_TEMPERATURE_UNIT),
+                config.get(CONF_PRESET),
             )
         ]
     )
@@ -125,7 +123,7 @@ class ClimateMaster(ClimateDevice):
     """Representation of a climate group."""
 
     def __init__(
-            self, name: str, entity_ids: List[str], excluded: List[str], unit: str
+            self, name: str, entity_ids: List[str], excluded: List[str], unit: str, preset: Dict[str, float, float]
     ) -> None:
         """Initialize a climate group."""
         self._name = name  # type: str
@@ -150,6 +148,7 @@ class ClimateMaster(ClimateDevice):
         self._preset_modes = None
         self._preset = None
         self._excluded = excluded
+        self._preset = namedtuple("preset", preset.keys())(*preset.values())
 
     async def async_added_to_hass(self) -> None:
         """Register callbacks."""
@@ -285,6 +284,9 @@ class ClimateMaster(ClimateDevice):
         )
 
     async def async_update(self):
+
+        _LOGGER.debug(f"Preset loaded: {self._preset}")
+
         """Query all members and determine the climate group state."""
         raw_states = [self.hass.states.get(x) for x in self._entity_ids]
         states = list(filter(None, raw_states))
